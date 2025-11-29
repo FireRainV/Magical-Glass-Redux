@@ -1,0 +1,9 @@
+{
+    "id": "ExpandedAttackLib",
+    "version": "v2.2.15",
+    "engineVersion": "v0.10.0-dev",
+    "authors": [
+        "Sam Deluxe", // creator
+        "FireRainV" // current dev
+    ]
+}
