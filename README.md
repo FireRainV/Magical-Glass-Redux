@@ -4,7 +4,7 @@
 <img src="magicalglass.png" alt="Magical Glass" width="50%" />
 </p>
 
-Adds **UNDERTALE** battles(and more!) to Kristal! (And expands the light world in general)
+Adds **UNDERTALE** battles (and more!) to Kristal! (And expands the light world in general)
 
 ## This library adds:
 * UNDERTALE battles in the light and dark world!
