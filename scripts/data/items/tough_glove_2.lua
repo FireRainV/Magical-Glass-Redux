@@ -46,7 +46,7 @@ function item:init()
     
     self.bolt_count = 4
     self.bolt_speed = 4
-    self.multibolt_variance = {{30, 60}}
+    self.multibolt_variance = {{40, 60}}
 
     self.attack_sound = "punchstrong"
 

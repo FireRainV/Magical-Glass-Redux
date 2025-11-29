@@ -50,7 +50,7 @@ function item:init()
     self.inv_bonus = 15/30
     
     self.bolt_count = 2
-    self.multibolt_variance = {{50, 75}}
+    self.multibolt_variance = {{40, 60}}
 
     self.attack_sound = "bookspin"
     self.attack_pitch = 0.9

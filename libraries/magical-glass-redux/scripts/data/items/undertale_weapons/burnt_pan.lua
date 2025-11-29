@@ -42,7 +42,7 @@ function item:init()
     self.light_bolt_direction = "left"
     
     self.bolt_count = 4
-    self.multibolt_variance = {{50, 75}}
+    self.multibolt_variance = {{40, 60}}
 
     self.attack_sound = "frypan"
 end
