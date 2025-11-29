@@ -32,17 +32,8 @@ Adds **UNDERTALE** battles (and more!) to Kristal! (And expands the light world 
 * Nyako (made the basics and dust code + Remake of UT Borders)
 * bor (assistant, map recreations)
 * Just Another Random User (assistant)
-<!-- ## Contributors: -->
-### Moldsmal Recreation:
-* BrendaK2700
-
-### Frisk Recreation:
-* SadDiamondMan
-* FireRainV
-
-### Testers:
-* Racckoon
-* FireRainV
+* BrendaK2700 (Moldsmal Recreation)
+* SadDiamondMan (Frisk Recreation)
 
 ### Resources:
 * UNDERTALE Team
