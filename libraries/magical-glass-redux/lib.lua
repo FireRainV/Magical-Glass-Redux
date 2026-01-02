@@ -7,6 +7,7 @@ LightArena               = libRequire("magical-glass", "scripts/lightbattle/ligh
 LightEncounter           = libRequire("magical-glass", "scripts/lightbattle/lightencounter")
 LightSoul                = libRequire("magical-glass", "scripts/lightbattle/lightsoul")
 LightWave                = libRequire("magical-glass", "scripts/lightbattle/lightwave")
+LightBullet              = libRequire("magical-glass", "scripts/lightbattle/lightbullet")
 LightRecruit             = libRequire("magical-glass", "scripts/lightbattle/lightrecruit")
 LightBattleUI            = libRequire("magical-glass", "scripts/lightbattle/ui/lightbattleui")
 HelpWindow               = libRequire("magical-glass", "scripts/lightbattle/ui/helpwindow")
@@ -41,6 +42,7 @@ function lib:unload()
     LightEncounter           = nil
     LightSoul                = nil
     LightWave                = nil
+    LightBullet              = nil
     LightBattleUI            = nil
     HelpWindow               = nil
     LightDamageNumber        = nil
@@ -267,6 +269,7 @@ function lib:preInit()
         onRegisterLightEncounters = "onRegisterLightEncounters",
         onRegisterLightEnemies = "onRegisterLightEnemies",
         onRegisterLightWaves = "onRegisterLightWaves",
+        onRegisterLightBullets = "onRegisterLightBullets",
         onRegisterLightShops = "onRegisterLightShops",
         onRegisterLightRecruits = "onRegisterLightRecruits",
     }
@@ -328,6 +331,14 @@ function lib:onRegistered()
         self.light_waves[light_wave.id] = light_wave
     end
     Kristal.callEvent(MG_EVENT.onRegisterLightWaves)
+    
+    self.light_bullets = {}
+    for _,path,light_bullet in Registry.iterScripts("battle/lightbullets") do
+        assert(light_bullet ~= nil, '"lightbullets/'..path..'.lua" does not return value')
+        light_bullet.id = light_bullet.id or path
+        self.light_bullets[light_bullet.id] = light_bullet
+    end
+    Kristal.callEvent(MG_EVENT.onRegisterLightBullets)
 
     self.light_shops = {}
     for _,path,light_shop in Registry.iterScripts("lightshops") do
@@ -2146,30 +2157,24 @@ function lib:init()
 
         self.last_talking = self.state.talk_anim and self.state.typing
     end)
-
+    
+    Utils.hook(Wave, "spawnBulletTo", function(orig, self, parent, bullet, ...)
+        local new_bullet = orig(self, parent, bullet, ...)
+        if new_bullet:includes(LightBullet) then
+            error("Attempted to use LightBullet in a DarkBattle. Convert \""..bullet.."\" to a Bullet")
+        end
+        return new_bullet
+    end)
+    
     Utils.hook(Bullet, "init", function(orig, self, x, y, texture)
         orig(self, x, y, texture)
         if Game:isLight() then
             self.inv_timer = 1
         end
-        if Game.battle.light then
-            self.destroy_on_hit = "alt"
-            self.layer = LIGHT_BATTLE_LAYERS["bullets"]
-        end
-        self.bonus_damage = nil -- Whether the bullet deals bonus damage when having more HP (Light World only)
-        self.remove_outside_of_arena = false
     end)
     
     Utils.hook(Bullet, "onDamage", function(orig, self, soul)
-        lib.bonus_damage = nil
-        if self.attacker then
-            lib.bonus_damage = self.attacker.bonus_damage
-        end
-        if self.bonus_damage ~= nil then
-            lib.bonus_damage = self.bonus_damage
-        end
         local battlers = orig(self, soul)
-        lib.bonus_damage = nil
         
         if self:getDamage() > 0 then
             local best_amount
@@ -2195,30 +2200,6 @@ function lib:init()
             return self.damage or (self.attacker and self.attacker.attack) or 0
         else
             return orig(self)
-        end
-    end)
-
-    Utils.hook(Bullet, "update", function(orig, self)
-        orig(self)
-        local x, y = self:getScreenPos()
-        if self.remove_outside_of_arena and
-            (x < Game.battle.arena.left or
-            x > Game.battle.arena.right or
-            y > Game.battle.arena.bottom or
-            y < Game.battle.arena.top)
-            then
-            self:remove()
-        end
-    end)
-    
-    Utils.hook(Bullet, "onCollide", function(orig, self, soul)
-        if soul.inv_timer == 0 then
-            self:onDamage(soul)
-            if self.destroy_on_hit then
-                self:remove()
-            end
-        elseif self.destroy_on_hit == true then
-            self:remove()
         end
     end)
 
@@ -2876,7 +2857,7 @@ function lib:init()
             local def = self.chara:getStat("defense")
             local hp = self.chara:getHealth()
             
-            local bonus = (lib.bonus_damage ~= false and self.bonus_damage ~= false) and hp > 20 and math.min(1 + math.floor((hp - 20) / 10), 8) or 0
+            local bonus = hp > 20 and math.min(1 + math.floor((hp - 20) / 10), 8) or 0
             amount = Utils.round(amount + bonus - def / 5)
             
             return math.max(amount, 1)
@@ -2893,15 +2874,6 @@ function lib:init()
         end
     end)
     
-    Utils.hook(PartyBattler, "hurt", function(orig, self, amount, exact, color, options)
-        if type(exact) == "string" then
-            exact = false
-            self.bonus_damage = false
-        end
-        orig(self, amount, exact, color, options)
-        self.bonus_damage = nil
-    end)
-    
     Utils.hook(EnemyBattler, "init", function(orig, self, actor, use_overlay)
         orig(self, actor, use_overlay)
         
@@ -2915,9 +2887,6 @@ function lib:init()
         self.tired_percentage = Game:isLight() and 0 or 0.5
         self.spare_percentage = Game:isLight() and 0.25 or 0
         self.low_health_percentage = Game:isLight() and 0.25 or 0.5
-        
-        -- Whether the enemy deals bonus damage when having more HP (Light World only)
-        self.bonus_damage = true
     end)
     
     Utils.hook(EnemyBattler, "onHurt", function(orig, self, damage, battler)
@@ -2933,7 +2902,7 @@ function lib:init()
             return damage
         end
         if Game:isLight() then
-            return ((battler.chara:getStat("attack") * points) / 68) - (self.defense * 2.2)
+            return ((battler.chara:getStat("attack") * points) / (750/11)) - (self.defense * (11/5))
         else
             return orig(self, damage, battler, points)
         end
@@ -4905,6 +4874,22 @@ function lib:createLightWave(id, ...)
         return self.light_waves[id](...)
     else
         error("Attempted to create non-existent light wave \"" .. tostring(id) .. "\"")
+    end
+end
+
+function lib:registerLightBullet(id, class)
+    self.light_bullets[id] = class
+end
+
+function lib:getLightBullet(id)
+    return self.light_bullets[id]
+end
+
+function lib:createLightBullet(id, ...)
+    if self.light_bullets[id] then
+        return self.light_bullets[id](...)
+    else
+        error("Attempted to create non-existent light bullet \"" .. tostring(id) .. "\"")
     end
 end
 

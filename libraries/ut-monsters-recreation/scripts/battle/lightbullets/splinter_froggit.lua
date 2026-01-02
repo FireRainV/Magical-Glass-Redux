@@ -1,4 +1,4 @@
-local bullet, super = Class(Bullet)
+local bullet, super = Class(LightBullet)
 
 function bullet:init(x, y)
     super.init(self, x, y, "bullets/froggit/bulletsm")

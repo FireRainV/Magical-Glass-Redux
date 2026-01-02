@@ -1,4 +1,4 @@
-local Scud, super = Class(Bullet)
+local Scud, super = Class(LightBullet)
 
 function Scud:init(x, y, dir, speed)
     -- Last argument = sprite path

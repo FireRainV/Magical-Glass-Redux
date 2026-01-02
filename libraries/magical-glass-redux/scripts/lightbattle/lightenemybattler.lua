@@ -21,9 +21,6 @@ function LightEnemyBattler:init(actor, use_overlay)
     self.health = 100
     self.attack = 1
     self.defense = 0
-    
-    -- Whether the enemy deals bonus damage when having more HP (Light World only)
-    self.bonus_damage = true
 
     self.money = 0
     self.experience = 0
@@ -733,7 +730,7 @@ function LightEnemyBattler:getAttackDamage(damage, lane, points, stretch)
         if Game:isLight() then
             total_damage = (battler.chara:getStat("attack") - self.defense) + Utils.random(0, 2, 1)
         else
-            total_damage = (battler.chara:getStat("attack") * 3.375 - self.defense * 1.363) + Utils.random(0, 2, 1)
+            total_damage = (battler.chara:getStat("attack") * (75/22) - self.defense * (15/11)) + Utils.random(0, 2, 1)
         end
         if points == 150 then
             total_damage = Utils.round(total_damage * (battler.chara:getWeapon() and Utils.containsValue(battler.chara:getWeapon().tags, "crit_nerf") and 2.1 or 2.2))
@@ -764,7 +761,7 @@ function LightEnemyBattler:getAttackDamage(damage, lane, points, stretch)
         if Game:isLight() then
             total_damage = (lane.battler.chara:getStat("attack") - self.defense)
         else
-            total_damage = (lane.battler.chara:getStat("attack") * 3.375 - self.defense * 1.363)
+            total_damage = (lane.battler.chara:getStat("attack") * (75/22) - self.defense * (15/11))
         end
         total_damage = total_damage * ((points / 160) * (4 / bolt_count))
         total_damage = Utils.round(total_damage * (points > (400 * (bolt_count / 4)) and Utils.containsValue(lane.weapon.tags, "crit_nerf") and (21/22) or 1)) + Utils.random(0, 2, 1)
@@ -790,7 +787,7 @@ function LightEnemyBattler:getAttackDamage(damage, lane, points, stretch)
         if Game:isLight() then
             total_damage = (lane.battler.chara:getStat("attack") - self.defense) + Utils.random(0, 2, 1)
         else
-            total_damage = (lane.battler.chara:getStat("attack") * 3.375 - self.defense * 1.363) + Utils.random(0, 2, 1)
+            total_damage = (lane.battler.chara:getStat("attack") * (75/22) - self.defense * (15/11)) + Utils.random(0, 2, 1)
         end
         if points <= 12 then
             total_damage = Utils.round(total_damage * (lane.weapon and Utils.containsValue(lane.weapon.tags, "crit_nerf") and 2.1 or 2.2))
@@ -827,7 +824,7 @@ function LightEnemyBattler:getDamageVoice() end
 
 function LightEnemyBattler:getAttackTension(amount)
     if Game.battle:hasReducedTension() then
-        return amount / 2.5
+        return (amount / 3) * 1
     end
     return amount * 1
 end

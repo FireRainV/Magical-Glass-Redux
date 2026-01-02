@@ -18,9 +18,6 @@ function Froggit:init()
     -- Enemy reward
     self.money = 2
     self.experience = 3
-    
-    -- Whether the enemy deals bonus damage when having more HP (Light World only)
-    self.bonus_damage = false
 
     -- The Speech bubble offset
     self.dialogue_offset = {20, 0}

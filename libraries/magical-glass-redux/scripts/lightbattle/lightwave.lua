@@ -57,13 +57,13 @@ function LightWave:spawnBulletTo(parent, bullet, ...)
     local new_bullet
     if isClass(bullet) and bullet:includes(Bullet) then
         new_bullet = bullet
-    elseif Registry.getBullet(bullet) then
-        new_bullet = Registry.createBullet(bullet, ...)
+    elseif MagicalGlassLib:getLightBullet(bullet) then
+        new_bullet = MagicalGlassLib:createLightBullet(bullet, ...)
     else
         local x, y = ...
         table.remove(arg, 1)
         table.remove(arg, 1)
-        new_bullet = Bullet(x, y, bullet, unpack(arg))
+        new_bullet = LightBullet(x, y, bullet, unpack(arg))
     end
     new_bullet.wave = self
     local attackers
@@ -84,6 +84,9 @@ function LightWave:spawnBulletTo(parent, bullet, ...)
         Game.battle:addChild(new_bullet)
     end
     new_bullet:onWaveSpawn(self)
+    if not new_bullet:includes(LightBullet) then
+        error("Attempted to use Bullet in a LightBattle. Convert \""..bullet.."\" to a LightBullet")
+    end
     return new_bullet
 end
 

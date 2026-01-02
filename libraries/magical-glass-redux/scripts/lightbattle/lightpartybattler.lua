@@ -33,7 +33,7 @@ function LightPartyBattler:calculateDamage(amount)
     local hp = self.chara:getHealth()
     
     if Game:isLight() then
-        local bonus = (MagicalGlassLib.bonus_damage ~= false and self.bonus_damage ~= false) and hp > 20 and math.min(1 + math.floor((hp - 20) / 10), 8) or 0
+        local bonus = hp > 20 and math.min(1 + math.floor((hp - 20) / 10), 8) or 0
         amount = Utils.round(amount + bonus - def / 5)
     else
         local threshold_a = (max_hp / 5)
@@ -87,11 +87,6 @@ function LightPartyBattler:getElementReduction(element)
 end
 
 function LightPartyBattler:hurt(amount, exact, color, options)
-    if type(exact) == "string" then
-        exact = false
-        self.bonus_damage = false
-    end
-    
     options = options or {}
     
     local swoon = options["swoon"]
@@ -126,8 +121,6 @@ function LightPartyBattler:hurt(amount, exact, color, options)
         
         self:removeHealthBroken(amount, swoon)
     end
-    
-    self.bonus_damage = nil
 end
 
 function LightPartyBattler:removeHealth(amount, swoon)

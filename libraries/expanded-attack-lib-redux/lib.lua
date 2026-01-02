@@ -668,7 +668,7 @@ function Lib:init()
 
                     elseif close <= -2 then
 
-                        local points = box:miss() -- lmao
+                        local points = box:miss()
 
                         local action = self:getActionBy(box.battler)
                         action.points = points

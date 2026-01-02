@@ -14,7 +14,6 @@ function Moldsmal:init()
     self.money = 3
     self.experience = 3
     self.mercy = 100
-    self.bonus_damage = false
 
     self.scalevalue = 0.01
     self.yscale = 1
