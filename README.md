@@ -19,6 +19,9 @@ Adds **UNDERTALE** battles (and more!) to Kristal! (And expands the light world 
 ## Some additional libraries of mine which are included in:
 * MoreParty (Lets you play with up to 8 party members)
 * Expanded Attack Lib: Redux (Let's you have more control over attacking in dark battles)
+* Classic Turn Based RPG (Damage it directly applied instead of being a bullet-hell)
+* Enemy Tension Bar (Adds a custom tension bar for the enemies)
+* Multiplayer (Allows playing with multiple players)
 
 ## Credits:
 

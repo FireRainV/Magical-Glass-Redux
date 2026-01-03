@@ -16,6 +16,9 @@ function character:init()
         self:addSpell("ultimate_heal")
         
         self.undertale_movement = true
+        
+        self.soul_color = {1, 0, 0, 1}
+        self.soul_facing = "up"
     end
 end
 
