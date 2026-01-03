@@ -241,13 +241,13 @@ function Lib:init()
             if perfect_score - score <= 0 then
                 self.crit = true
                 Assets.stopAndPlaySound("saber3")
-                return increased and 425 or 195
+                return increased and 420 or 190
             elseif perfect_score - score <= 30 then
                 self.crit = true
                 Assets.stopAndPlaySound("saber3")
-                return increased and 225 or 175
+                return increased and 220 or 175
             elseif perfect_score - score <= 60 then
-                return increased and 170 or 160
+                return increased and 165 or 160
             elseif perfect_score - score <= 90 then
                 return increased and 155 or 150
             else
