@@ -8,7 +8,7 @@
         "Bor",                          // contributor
         "Just Another Random User",     // contributor
     ],
-    "version": "v3.8.1",
+    "version": "v3.8.2",
     "engineVer": "v0.10.0-dev",
 
     "config": {
