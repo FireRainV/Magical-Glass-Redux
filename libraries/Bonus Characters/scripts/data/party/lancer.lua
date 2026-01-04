@@ -103,9 +103,9 @@ function character:init()
     self.attack_pitch = 1
 
     -- Battle position offset (optional)
-    self.battle_offset = {2, 1}
+    self.battle_offset = {1, -2}
     -- Head icon position offset (optional)
-    self.head_icon_offset = {2, -1}
+    self.head_icon_offset = {0, -2}
     -- Menu icon position offset (optional)
     self.menu_icon_offset = nil
 

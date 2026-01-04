@@ -77,11 +77,11 @@ function character:init()
     -- Character color (for action box outline and hp bar)
     self.color = {255/255, 242/255, 0/255}
     -- Damage color (for the number when attacking enemies) (defaults to the main color)
-    self.dmg_color = {235/255, 222/255, 0/255}
+    self.dmg_color = {255/255, 232/255, 0/255}
     -- Attack bar color (for the target bar used in attack mode) (defaults to the main color)
     self.attack_bar_color = nil
     -- Attack box color (for the attack area in attack mode) (defaults to darkened main color)
-    self.attack_box_color = nil
+    self.attack_box_color = {255/255, 202/255, 0/255}
     -- X-Action color (for the color of X-Action menu items) (defaults to the main color)
     self.xact_color = nil
 
@@ -100,7 +100,7 @@ function character:init()
     self.attack_pitch = 1
 
     -- Battle position offset (optional)
-    self.battle_offset = nil
+    self.battle_offset = {-2, -1}
     -- Head icon position offset (optional)
     self.head_icon_offset = nil
     -- Menu icon position offset (optional)
