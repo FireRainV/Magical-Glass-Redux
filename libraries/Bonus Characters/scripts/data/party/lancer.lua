@@ -1,25 +1,28 @@
-local character, super = Class(PartyMember, "berdly")
+local character, super = Class(PartyMember, "lancer")
 
 function character:init()
     super.init(self)
 
     -- Display name
-    self.name = "Berdly"
+    self.name = "Lancer"
     
     -- Light world portrait in the menu (saved to the save file)
-    self.lw_portrait = "face/berdly_lw/smirk"
+    self.lw_portrait = "face/lancer/smile_b"
 
     -- Actor (handles overworld/battle sprites)
-    self:setActor("berdly")
-    self:setLightActor("berdly_lw")
+    self:setActor("lancer")
 
     -- Display level (saved to the save file)
     self.level = 1
     -- Default title / class (saved to the save file)
-    self.title = "Gamer\nUses powerful\nfighting skills."
+    if Game.chapter == 1 then
+        self.title = "Dark Prince\nDark-World being.\nHas no friends."
+    else
+        self.title = "King of Spades\nDark-World being.\nRules his kingdom."
+    end
 
     -- Determines which character the soul comes from (higher number = higher priority)
-    self.soul_priority = 1
+    self.soul_priority = -1
     -- The color of this character's soul (optional, defaults to red)
     self.soul_color = {1, 1, 1}
     -- In which direction will this character's soul face (optional, defaults to facing up)
@@ -32,40 +35,26 @@ function character:init()
     -- Whether the party member can use their X-Action
     self.has_xact = true
     -- X-Action name (displayed in this character's spell menu)
-    self.xact_name = "B-Action"
+    self.xact_name = "L-Action"
     
     -- Spells
-    self:addSpell("wavedash")
+    self:addSpell("cardshot")
     self:addSpell("pacify")
 
     -- Current health (saved to the save file)
-    self.health = 100
+    self.health = 90
 
     -- Base stats (saved to the save file)
     self.stats = {
-        health = 100,
-        attack = 13,
+        health = 90,
+        attack = 10,
         defense = 2,
-        magic = 1
+        magic = 6
     }
     -- Max stats from level-ups
     self.max_stats = {
         health = 140
     }
-
-    -- Weapon icon in equip menu
-    self.weapon_icon = "ui/menu/equip/halberd"
-
-    -- Equipment (saved to the save file)
-    self:setWeapon("gilded_halberd")
-    self:setArmor(1, "smart_scouter")
-    if Game.chapter >= 2 then
-        self:setArmor(2, "royalpin")
-    end
-
-    -- Default light world equipment item IDs (saves current equipment)
-    self.lw_weapon_default = "light/pencil"
-    self.lw_armor_default = "light/bandage"
     
     self.lw_health = 20
     -- Light world base stats (saved to the save file)
@@ -76,23 +65,35 @@ function character:init()
         magic = 1
     }
 
+    -- Weapon icon in equip menu
+    self.weapon_icon = "ui/menu/equip/spade"
+
+    -- Equipment (saved to the save file)
+    self:setWeapon("spade")
+    self:setArmor(1, "amber_card")
+    self:setArmor(2, "amber_card")
+
+    -- Default light world equipment item IDs (saves current equipment)
+    self.lw_weapon_default = "light/pencil"
+    self.lw_armor_default = "light/bandage"
+
     -- Character color (for action box outline and hp bar)
-    self.color = {15/255, 150/255, 78/255}
+    self.color = {84/255, 130/255, 187/255}
     -- Damage color (for the number when attacking enemies) (defaults to the main color)
-    self.dmg_color = {18/255, 181/255, 94/255}
+    self.dmg_color = {95/255, 147/255, 211/255}
     -- Attack bar color (for the target bar used in attack mode) (defaults to the main color)
-    self.attack_bar_color = {43/255, 165/255, 100/255}
+    self.attack_bar_color = {84/255, 130/255, 187/255}
     -- Attack box color (for the attack area in attack mode) (defaults to darkened main color)
-    self.attack_box_color = {0, 114/255, 53/255}
+    self.attack_box_color = {49/255, 92/255, 145/255}
     -- X-Action color (for the color of X-Action menu items) (defaults to the main color)
-    self.xact_color = {18/255, 181/255, 94/255}
+    self.xact_color = {95/255, 147/255, 211/255}
 
     -- Head icon in the equip / power menu
-    self.menu_icon = "party/berdly/head"
+    self.menu_icon = "party/lancer/head"
     -- Path to head icons used in battle
-    self.head_icons = "party/berdly/icon"
+    self.head_icons = "party/lancer/icon"
     -- Name sprite
-    self.name_sprite = "party/berdly/name"
+    self.name_sprite = "party/lancer/name"
 
     -- Effect shown above enemy after attacking it
     self.attack_sprite = "effects/attack/cut"
@@ -104,7 +105,7 @@ function character:init()
     -- Battle position offset (optional)
     self.battle_offset = {2, 1}
     -- Head icon position offset (optional)
-    self.head_icon_offset = nil
+    self.head_icon_offset = {2, -1}
     -- Menu icon position offset (optional)
     self.menu_icon_offset = nil
 
@@ -117,22 +118,15 @@ function character:lightLVStats()
         health = self:getLightLV() == 20 and 99 or 16 + self:getLightLV() * 4,
         attack = 9 + self:getLightLV() + math.floor(self:getLightLV() / 3),
         defense = 9 + math.ceil(self:getLightLV() / 4),
-        magic = math.ceil(self:getLightLV() / 2)
+        magic = self:getLightLV()
     }
 end
 
 function character:getGameOverMessage(main)
     return {
-        "Oh, no! ".. main.name ..", are you all right?",
-        "Do not die on me, ".. main.name .."! Do not!!!"
+        "U-umm... ".. main.name ..",\n[wait:5]are you OK?",
+        "C-Come on![wait:5]\nYou got to get up!"
     }
-end
-
-function character:onAttackHit(enemy, damage)
-    if damage > 0 then
-        Assets.playSound("impact", 0.8)
-        Game.battle:shakeCamera()
-    end
 end
 
 function character:onLevelUp(level)
@@ -146,21 +140,29 @@ end
 function character:drawPowerStat(index, x, y, menu)
     if index == 1 then
         
-        local icon = Assets.getTexture("ui/menu/icon/gamer")
+        local icon = Assets.getTexture("ui/menu/icon/spade")
         love.graphics.draw(icon, x-26, y+6, 0, 2, 2)
 
-        love.graphics.print("Gamer", x, y, 0, 1, 1)
-        love.graphics.print("Yes", x+130, y)
+        love.graphics.print("Royal Status", x, y, 0, 0.6, 1)
+        if Game.chapter == 1 then
+            love.graphics.print("Prince", x+130, y, 0, 0.7, 1)
+        else
+            love.graphics.print("King", x+130, y)
+        end
 
         return true
 		
     elseif index == 2 then
         
-        local icon = Assets.getTexture("ui/menu/icon/bird")
+        local icon = Assets.getTexture("ui/menu/icon/demon")
         love.graphics.draw(icon, x-26, y+6, 0, 2, 2)
 
-        love.graphics.print("Bird", x, y, 0, 1, 1)
-        love.graphics.print("Yes", x+130, y)
+        love.graphics.print("Bad Guy", x, y, 0, 1, 1)
+        if Game.chapter == 1 then
+            love.graphics.print("Yes", x+130, y)
+        else
+            love.graphics.print("Maybe", x+130, y, 0, 0.8, 1)
+        end
 
         return true
 
@@ -168,8 +170,6 @@ function character:drawPowerStat(index, x, y, menu)
         local icon = Assets.getTexture("ui/menu/icon/fire")
         love.graphics.draw(icon, x-26, y+6, 0, 2, 2)
         love.graphics.print("Guts:", x, y)
-
-        love.graphics.draw(icon, x+90, y+6, 0, 2, 2)
         return true
     end
 end
