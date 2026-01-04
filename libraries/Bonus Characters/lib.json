@@ -4,9 +4,9 @@
         "Bor", // Making the thing (Berdly and Lancer)
         "u/Kiptty", // Fight, act, item, defend sprites (Berdly and Lancer)
 		"Charbomber", // (Dess)
-        "Dark Place Dev Team", // (Starwalker, and Dess Spells)
+        "Dark Place Dev Team", // (Starwalker, and Dess+Ceroba Spells)
 	    "FireRainV" // QoL changes
     ],
-    "version": "v1.3.1",
+    "version": "v1.4.0",
     "engineVer": "v0.10.0-dev"
 }

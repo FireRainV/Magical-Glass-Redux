@@ -96,7 +96,7 @@ function character:init()
     self.name_sprite = "party/lancer/name"
 
     -- Effect shown above enemy after attacking it
-    self.attack_sprite = "effects/attack/cut"
+    self.attack_sprite = "effects/attack/s_cut"
     -- Sound played when this character attacks
     self.attack_sound = "laz_c"
     -- Pitch of the attack sound

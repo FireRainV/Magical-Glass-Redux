@@ -14,7 +14,7 @@ function actor:init()
     self.hitbox = {2, 27, 20, 14}
 
     -- Color for this actor used in outline areas (optional, defaults to red)
-    self.color = {0, 0, 1}
+    self.color = {0, 1, 1}
 
     -- Path to this actor's sprites (defaults to "")
     self.path = "party/berdly/dark"
