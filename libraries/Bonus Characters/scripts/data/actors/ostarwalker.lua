@@ -10,6 +10,10 @@ function actor:init()
 
     -- Hitbox for this actor in the overworld (optional, uses width and height by default)
     self.hitbox = {4, 25, 21, 15}
+    
+    -- A table that defines where the Soul should be placed on this actor if they are a player.
+    -- First value is x, second value is y.
+    self.soul_offset = {18, 18}
 
     -- Color for this actor used in outline areas (optional, defaults to red)
     self.color = {1, 1, 0}
@@ -69,7 +73,6 @@ function actor:init()
 
     -- Table of sprite offsets (indexed by sprite name)
     self.offsets = {
-        -- walk sprites are WEIRD for this guy and I don't know why.
         ["walk/right"] = {-2, 4},
         ["walk/left"] = {0, 4},
         ["battle/attackready"] = {0, -6},

@@ -1,25 +1,25 @@
-local item, super = Class(Item, "spade")
+local item, super = Class(Item, "box")
 
 function item:init()
     super.init(self)
 
     -- Display name
-    self.name = "Spade"
+    self.name = "Box"
 
     -- Item type (item, key, weapon, armor)
     self.type = "weapon"
     -- Item icon (for equipment)
-    self.icon = "ui/menu/icon/spade"
+    self.icon = "ui/menu/icon/box"
 
     -- Battle description
     self.effect = ""
     -- Shop description
     self.shop = ""
     -- Menu description
-    self.description = "A glowy, white spade. Summoned by magic."
+    self.description = "Just a box."
 
     -- Default shop price (sell price is halved)
-    self.price = 60
+    self.price = 10
     -- Whether the item can be sold
     self.can_sell = true
 
@@ -42,17 +42,17 @@ function item:init()
 
     -- Equippable characters (default true for armors, false for weapons)
     self.can_equip = {
-        lancer = true,
+        rouxls_kaard = true,
     }
 
     -- Character reactions
     self.reactions = {
-        susie = "Hey, let Lancer keep that.",
-        ralsei = "Not my type of magic...",
-        noelle = "Shiny...",
-        berdly = "Hoho! I'm not touching this!",
-        lancer = "Mine!",
-        ostarwalker = "Ace",
+        susie = "Reminds me of Halloween.",
+        ralsei = "We can create a puzzle!",
+        noelle = "Can we turn it into a gift?",
+        berdly = "Stop, I don't want that.",
+        lancer = "Ohhh! Cool stand.",
+        ostarwalker = "Box",
     }
 end
 
