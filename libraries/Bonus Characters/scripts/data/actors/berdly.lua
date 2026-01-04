@@ -11,7 +11,7 @@ function actor:init()
     self.height = 40
 
     -- Hitbox for this actor in the overworld (optional, uses width and height by default)
-    self.hitbox = {2, 25, 20, 14}
+    self.hitbox = {2, 27, 20, 14}
 
     -- Color for this actor used in outline areas (optional, defaults to red)
     self.color = {0, 0, 1}
@@ -26,7 +26,7 @@ function actor:init()
     -- Path to this actor's portrait for dialogue (optional)
     self.portrait_path = "face/berdly"
     -- Offset position for this actor's portrait (optional)
-    self.portrait_offset = nil
+    self.portrait_offset = {-10, 0}
 
     -- Whether this actor as a follower will blush when close to the player
     self.can_blush = false
@@ -49,17 +49,18 @@ function actor:init()
         ["battle/act_ready"]    = {"battle/actready", 0.2, true},
         ["battle/spell_ready"]  = {"battle/spellready", 0.2, true},
         ["battle/item_ready"]   = {"battle/itemready", 0.2, true},
-        ["battle/defend_ready"] = {"battle/defend", 0.02, false},
+        ["battle/defend_ready"] = {"battle/defend", 1/15, false},
 
         ["battle/act_end"]      = {"battle/actend", 1/15, false, next="battle/idle"},
 
-        ["battle/rude_buster"]  = {"battle/rudebuster", 1/15, false, next="battle/idle"},
+        ["battle/super_jump"]   = {"battle/super_jump", 1/15, false, next="battle/super_jump_loop"},
+        ["battle/super_jump_loop"] = {"battle/super_jump_loop", 1/15, true},
 
         ["battle/hurt"]         = {"battle/hurt", 1/15, false, temp=true, duration=0.5},
         ["battle/defeat"]       = {"battle/defeat", 1/15, false},
         ["battle/swooned"]      = {"battle/defeat", 1/15, false},
 
-        ["battle/transition"]   = {"sword_jump_down", 0.2, true},
+        ["battle/transition"]   = {"battle/transition", 0.2, true},
         ["battle/intro"]        = {"battle/attack", 1/15, true},
         ["battle/victory"]      = {"battle/victory", 1/10, false},
 
@@ -83,19 +84,15 @@ function actor:init()
     -- Table of sprite offsets (indexed by sprite name)
     self.offsets = {
         -- Movement offsets
-        ["walk/left"] = {0, 0},
-        ["walk/right"] = {0, 0},
-        ["walk/up"] = {0, 0},
-        ["walk/down"] = {0, 0},
+        ["walk/left"] = {1, 0},
+        ["walk/right"] = {1, 0},
+        ["walk/up"] = {1, 0},
+        ["walk/down"] = {1, 0},
 
-        ["walk_unhappy/down"] = {0, 0},
-        ["walk_unhappy/left"] = {0, 0},
-        ["walk_unhappy/right"] = {0, 0},
-        ["walk_unhappy/up"] = {0, 0},
-
-        ["walk_blush/down"] = {0, 0},
-
-        ["slide"] = {0, 0},
+        ["walk_unhappy/down"] = {1, 0},
+        ["walk_unhappy/left"] = {1, 0},
+        ["walk_unhappy/right"] = {1, 0},
+        ["walk_unhappy/up"] = {1, 0},
 
         -- Battle offsets
         ["battle/idle"] = {-5, -1},
@@ -107,7 +104,8 @@ function actor:init()
         ["battle/actready"] = {-6, -6},
         ["battle/spell"] = {-30, -38},
         ["battle/spellready"] = {-25, -23},
-        ["battle/rudebuster"] = {-52, -60},
+        ["battle/super_jump"] = {-42, -61},
+        ["battle/super_jump_loop"] = {-42, -61},
         ["battle/item"] = {-20, -13},
         ["battle/itemready"] = {-20, -15},
         ["battle/defend"] = {-30, -20},
@@ -117,9 +115,6 @@ function actor:init()
 
         ["battle/intro"] = {-35, -35},
         ["battle/victory"] = {-37, -14},
-
-        -- Cutscene offsets
-        
     }
 end
 

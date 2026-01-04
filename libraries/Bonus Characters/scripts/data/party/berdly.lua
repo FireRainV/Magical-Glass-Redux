@@ -35,7 +35,7 @@ function character:init()
     self.xact_name = "B-Action"
     
     -- Spells
-    self:addSpell("wavedash")
+    self:addSpell("spearblaster")
     self:addSpell("pacify")
 
     -- Current health (saved to the save file)
