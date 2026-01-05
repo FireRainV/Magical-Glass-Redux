@@ -1,7 +1,10 @@
 local Lib = {}
 
+function Lib:load()
+    self.clearInput = true
+end
+
 function Lib:init()
-    self.clearInput = false
     self.colors = {COLORS.white, COLORS.gray, COLORS.dkgray}
     self.max_players = Utils.clamp(Kristal.getLibConfig("multiplayer", "max_players"), 1, Mod.libs["moreparty"] and 4 or 3)
     self.gamepad_bindings = Input.gamepad_bindings

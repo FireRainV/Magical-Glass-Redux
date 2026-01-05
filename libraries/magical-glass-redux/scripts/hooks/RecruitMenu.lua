@@ -13,7 +13,7 @@ function RecruitMenu:init()
     self.description_font = Assets.getFont("plain")
 
     if Game:isLight() then
-        self.heart = Sprite("player/heart_menu", 58, 114)
+        self.heart = Sprite("player/heart_menu", 65, 117)
         self.heart:setScale(2)
     else
         self.heart = Sprite("player/heart", 58, 114)

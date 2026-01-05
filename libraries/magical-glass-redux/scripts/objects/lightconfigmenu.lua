@@ -4,6 +4,7 @@ function LightConfigMenu:init()
     super.init(self)
     
     self:setParallax(0, 0)
+    self.currently_selected = 1
     self.heart_sprite = Assets.getTexture("player/heart_menu")
 end
 
@@ -41,26 +42,26 @@ function LightConfigMenu:draw()
         if self.state == "VOLUME" then
             Draw.setColor(PALETTE["world_text_selected"])
         end
-        love.graphics.print("Master Volume", 88, 38 + (0 * 32))
+        love.graphics.print("Master Volume", 88, 38 + (0 * 35))
         Draw.setColor(PALETTE["world_text"])
-        love.graphics.print("Controls", 88, 38 + (1 * 32))
-        love.graphics.print("Simplify VFX", 88, 38 + (2 * 32))
-        love.graphics.print("Fullscreen", 88, 38 + (3 * 32))
-        love.graphics.print("Auto-Run", 88, 38 + (4 * 32))
-        love.graphics.print("Return to Title", 88, 38 + (5 * 32))
-        love.graphics.print("Exit", 88, 38 + (6 * 32))
+        love.graphics.print("Controls", 88, 38 + (1 * 35))
+        love.graphics.print("Simplify VFX", 88, 38 + (2 * 35))
+        love.graphics.print("Fullscreen", 88, 38 + (3 * 35))
+        love.graphics.print("Auto-Run", 88, 38 + (4 * 35))
+        love.graphics.print("Return to Title", 88, 38 + (5 * 35))
+        love.graphics.print("Exit", 88, 38 + (6 * 35))
 
         if self.state == "VOLUME" then
             Draw.setColor(PALETTE["world_text_selected"])
         end
-        love.graphics.print(Utils.round(Kristal.getVolume() * 100) .. "%", 348, 38 + (0 * 32))
+        love.graphics.print(Utils.round(Kristal.getVolume() * 100) .. "%", 348, 38 + (0 * 35))
         Draw.setColor(PALETTE["world_text"])
-        love.graphics.print(Kristal.Config["simplifyVFX"] and "ON" or "OFF", 348, 38 + (2 * 32))
-        love.graphics.print(Kristal.Config["fullscreen"] and "ON" or "OFF", 348, 38 + (3 * 32))
-        love.graphics.print(Kristal.Config["autoRun"] and "ON" or "OFF", 348, 38 + (4 * 32))
+        love.graphics.print(Kristal.Config["simplifyVFX"] and "ON" or "OFF", 348, 38 + (2 * 35))
+        love.graphics.print(Kristal.Config["fullscreen"] and "ON" or "OFF", 348, 38 + (3 * 35))
+        love.graphics.print(Kristal.Config["autoRun"] and "ON" or "OFF", 348, 38 + (4 * 35))
 
         Draw.setColor(Game:getSoulColor())
-        Draw.draw(self.heart_sprite, 64, 46 + ((self.currently_selected - 1) * 32), 0, 2, 2)
+        Draw.draw(self.heart_sprite, 64, 46 + ((self.currently_selected - 1) * 35), 0, 2, 2)
     else
         -- NOTE: This is forced to true if using a PlayStation in DELTARUNE... Kristal doesn't have a PlayStation port though.
         local dualshock = Input.getControllerType() == "ps4"
