@@ -1,5 +1,15 @@
 local lib = {}
 
+function lib:preInit()
+    SR_EVENT = {
+        getSoulFacing = "getSoulFacing",
+    }
+end
+
+function lib:unload()
+    SR_EVENT = nil
+end
+
 function lib:init()
     if Mod.libs["multiplayer"] then
         return -- disable the library
@@ -34,16 +44,21 @@ function lib:init()
     Utils.hook(PartyMember, "getSoulFacing", function(orig, self) return self.soul_facing end)
     
     Utils.hook(Game, "getSoulFacing", function(orig, self)
+        local face = Kristal.callEvent(SR_EVENT.getSoulFacing)
+        if face ~= nil then
+            return face
+        end
+        
         if Game.state == "BATTLE" and Game.battle and Game.battle.encounter and Game.battle.encounter.getSoulFacing and Game.battle.encounter:getSoulFacing() then
             return Game.battle.encounter:getSoulFacing()
         end
-
+        
         local chara = Game:getSoulPartyMember()
-
+        
         if chara and chara:getSoulPriority() >= 0 and chara:getSoulFacing() then
             return chara:getSoulFacing()
         end
-
+        
         return "up"
     end)
     
