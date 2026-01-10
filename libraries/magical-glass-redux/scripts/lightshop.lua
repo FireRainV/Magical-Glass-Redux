@@ -115,6 +115,8 @@ function LightShop:init()
     self.hide_price = false
 
     self.leave_options = {}
+    
+    self.hide_world = true
 end
 
 function LightShop:postInit()
@@ -331,8 +333,12 @@ function LightShop:onLeave()
 end
 
 function LightShop:leave()
-    self.fading_out = true
-    self.music:fade(0, 20/30)
+    if self:shouldFade() then
+        self.fading_out = true
+        self.music:fade(0, 20/30)
+    else
+        self:leaveImmediate()
+    end
 end
 
 function LightShop:leaveImmediate()
@@ -340,8 +346,10 @@ function LightShop:leaveImmediate()
     Game.shop = nil
     MagicalGlassLib.in_light_shop = false
     Game.state = "OVERWORLD"
-    Game.fader.alpha = 1
-    Game.fader:fadeIn()
+    if self:shouldFade() then
+        Game.fader.alpha = 1
+        Game.fader:fadeIn()
+    end
     Game.world:setState("GAMEPLAY")
 
     --self.transition_target.shop = nil
@@ -358,6 +366,10 @@ function LightShop:leaveImmediate()
         end
         Game.world.music:resume()
     end
+end
+
+function LightShop:shouldFade()
+    return self.leave_options["fade"] or self:isWorldHidden()
 end
 
 function LightShop:onTalk() end
@@ -770,9 +782,15 @@ function LightShop:draw()
 end
 
 function LightShop:drawBackground()
-    -- Draw a black backdrop
-    Draw.setColor(0, 0, 0, 1)
-    love.graphics.rectangle("fill", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    if self:isWorldHidden() then
+        -- Draw a black backdrop
+        Draw.setColor(0, 0, 0, 1)
+        love.graphics.rectangle("fill", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    end
+end
+
+function LightShop:isWorldHidden()
+    return self.hide_world
 end
 
 function LightShop:onKeyPressed(key, is_repeat)
