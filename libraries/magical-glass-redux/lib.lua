@@ -1437,6 +1437,22 @@ function lib:init()
         self.attack_pitch = 1
     end)
     
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        Utils.hook(Item, "getSellPrice", function(orig, self)
+            if Utils.sub(self.id, 1, 10) == "undertale/" then
+                return math.ceil(math.sqrt(orig(self)))
+            end
+            return orig(self)
+        end)
+        
+        Utils.hook(Item, "getBuyPrice", function(orig, self)
+            if Utils.sub(self.id, 1, 10) == "undertale/" then
+                return orig(self) > 0 and orig(self) or self:getSellPrice()*2
+            end
+            return orig(self)
+        end)
+    end
+    
     Utils.hook(Item, "getName", function(orig, self)
         if self.light and Game.state == "BATTLE" and not Game.battle.light and self.dark_name then
             return self.dark_name

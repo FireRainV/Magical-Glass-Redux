@@ -14,7 +14,10 @@ function item:init()
     self.light = true
 
     -- Default shop price (sell price is halved)
-    self.price = 40
+    self.price = 150
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        self.sell_price = 12
+    end
 
     -- Item description text (unused by light items outside of debug menu)
     self.description = "A light, wooden bat with a noticable crack on it."

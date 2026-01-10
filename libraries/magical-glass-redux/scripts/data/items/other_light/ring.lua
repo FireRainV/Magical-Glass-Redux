@@ -21,6 +21,9 @@ function item:init()
     self.usable_in = "all"
     
     self.price = 100
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        self.sell_price = 14
+    end
     
     self.shop_magic = true
 

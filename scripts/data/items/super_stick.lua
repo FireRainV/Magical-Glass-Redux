@@ -12,8 +12,13 @@ function item:init()
     -- Whether this item is for the light world
     self.light = true
 
-    -- Default shop sell price
-    self.sell_price = 151
+    self.price = 200
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        self.sell_price = 13
+    else
+        -- Default shop sell price
+        self.sell_price = 151
+    end
 
     -- Item description text (unused by light items outside of debug menu)
     self.description = "Attacks Twice!"

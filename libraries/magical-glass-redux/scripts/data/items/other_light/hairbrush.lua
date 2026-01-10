@@ -22,6 +22,9 @@ function item:init()
     self.usable_in = "all"
     
     self.price = 30
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        self.sell_price = 6
+    end
 
     -- Equip bonuses (for weapons and armor)
     self.bonuses = {

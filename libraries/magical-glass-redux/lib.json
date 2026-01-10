@@ -8,7 +8,7 @@
         "Bor",                          // contributor
         "Just Another Random User",     // contributor
     ],
-    "version": "v3.8.4",
+    "version": "v3.8.5",
     "engineVer": "v0.10.0-dev",
 
     "config": {
@@ -88,6 +88,11 @@
         /////
         "undertale_movement_can_run": false,
         
+        ///// Balanced UNDERTALE Items Price
+        // Whether to use balanced buy and sell prices for UNDERTALE items or use the original UNDERTALE prices.
+        /////
+        "balanced_undertale_items_price": true,
+        
         ///// Light Battles HP Gauge Length Cap
         // Limits the length of the HP bar in light battles.
         ///// Values:
@@ -105,7 +110,7 @@
         "hp_gauge_length_cap": true,
 
         ///// Item Conversion
-        // Like in Deltarune, converts the Dark World inventory to the Ball of Junk and items like the Shadow Crystal to Glass 
+        // Like in Deltarune, converts the Dark World inventory to the Ball of Junk and items like the Shadow Crystal to Glass
         // when traveling to the Light World or back.
         /////
         "item_conversion": true,

@@ -7,6 +7,9 @@ function item:init()
     self.short_name = "Watch"
 
     self.price = 100
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        self.sell_price = 14
+    end
 end
 
 return item

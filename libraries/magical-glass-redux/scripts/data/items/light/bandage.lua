@@ -11,8 +11,8 @@ function item:init()
     -- Whether this item is for the light world
     self.light = true
 
-    -- Default shop sell price
-    self.sell_price = 10
+    -- Default shop price (sell price is halved)
+    self.price = 30
     -- Whether the item can be sold
     self.can_sell = true
 

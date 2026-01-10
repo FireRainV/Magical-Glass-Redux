@@ -6,6 +6,9 @@ function item:init()
     self.short_name = "HotChoc"
 
     self.price = 18
+    if Kristal.getLibConfig("magical-glass", "balanced_undertale_items_price") then
+        self.sell_price = 6
+    end
 end
 
 function item:getLightBattleText(user, target)
