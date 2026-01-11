@@ -64,11 +64,6 @@ function actor:init()
         ["battle/transition"]   = {self.default.."/right_1", 1/15, false},
         ["battle/intro"]        = {"battle/intro", 1/15, false},
         ["battle/victory"]      = {"battle/victory", 1/10, false},
-
-        -- specific act animations
-        ["battle/dance"]        = {"battle/actdance", 1/5, true},
-        ["battle/takecare"]     = {"battle/actnurse", 0, false}
-
     }
 
     -- Table of sprite offsets (indexed by sprite name)

@@ -61,12 +61,9 @@ function actor:init()
         ["battle/defeat"]       = {"battle/defeat", 1/15, false},
         ["battle/swooned"]      = {"battle/defeat", 1/15, false},
 
-        ["battle/transition"]   = {"battle/transition", 0.2, true},
+        ["battle/transition"]   = {self.default.."/right_1", 1/15, false},
         ["battle/intro"]        = {"battle/act", 1/15, false},
         ["battle/victory"]      = {"battle/victory", 1/10, false},
-
-        ["battle/pray"]        = {"battle/pray", 1, true},
-        ["battle/spell_special"]      = {"battle/spell_special", 0.07, true},
 
         -- Cutscene animations
         ["jump_ball"]           = {"ball", 1/15, true},
@@ -132,9 +129,6 @@ function actor:init()
 
         ["battle/intro"] = {-35, -35},
         ["battle/victory"] = {-6, -6},
-
-        ["battle/pray"] = {-2, -5},
-        ["battle/spell_special"] = {-6, -12},
 
         -- Cutscene offsets
 

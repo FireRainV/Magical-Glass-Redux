@@ -52,7 +52,7 @@ function actor:init()
         ["battle/item_ready"]   = {"battle/itemready", 0.2, false},
         ["battle/defend_ready"] = {"battle/defend", 1/15, false},
 
-        ["battle/act_end"]      = {"battle/actend", 1/15, false, next="battle/idle"},
+        ["battle/act_end"]      = {"battle/attack", 1/15, false, next="battle/idle"},
 
         ["battle/hurt"]         = {"battle/hurt", 1/15, false, temp=true, duration=0.5},
         ["battle/defeat"]       = {"battle/defeat", 1/15, false},
@@ -85,7 +85,6 @@ function actor:init()
 
         -- Battle offsets
         ["battle/idle"] = {0, 0},
-        ["battle/attack_ready"] = {0, 0},
         ["battle/hit"] = {0, 0},
         ["battle/down"] = {0, 0},
         ["battle/spare"] = {0, 0},
@@ -110,6 +109,15 @@ function actor:init()
         -- Cutscene offsets
         ["ball"] = {0, 0},
     }
+end
+
+function actor:getOffset(sprite)
+    if string.sub(sprite, 1, 7) == "battle/" then
+        local x, y = super.getOffset(self, sprite)
+        return x - 9, y - 12
+    else
+        return super.getOffset(self, sprite)
+    end
 end
 
 function actor:getVoice()

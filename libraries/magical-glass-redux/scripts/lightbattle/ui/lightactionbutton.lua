@@ -193,7 +193,7 @@ function LightActionButton:select()
                 end
             })
         end
-        if Game.battle.encounter.can_flee then
+        if Game.battle.encounter:canFlee() then
             local battle_leader
             for i,battler in ipairs(Game.battle.party) do
                 if not battler.is_down and not battler.sleeping and not (Game.battle:getActionBy(battler) and Game.battle:getActionBy(battler).action == "AUTOATTACK")then

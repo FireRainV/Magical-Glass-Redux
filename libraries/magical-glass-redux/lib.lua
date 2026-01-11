@@ -776,6 +776,7 @@ function lib:init()
         self.soul_speed_bonus = 0
         self.used_violence_backup = false
         self.money_backup = 0
+        self.fled = false
         self.backup_palettes = {}
         
         if Game:isLight() then
@@ -968,24 +969,25 @@ function lib:init()
         self.flee_chance = 50
         
         self.flee_messages = {
-            "* I'm outta here.", -- 1/20
-            "* I've got better to do.", --1/20
-            "* Don't slow me down.", --1/20
-            "* Escaped..." --17/20
+            "* Escaped..."
         }
     end)
     
+    Utils.hook(Encounter, "canFlee", function(orig, self)
+        return self.can_flee
+    end)
+    
     Utils.hook(Encounter, "onTurnEnd", function(orig, self)
-        orig(self)
         self.flee_chance = self.flee_chance + 10
+        return orig(self)
     end)
     
     Utils.hook(Encounter, "getFleeMessage", function(orig, self)
-        return self.flee_messages[math.min(Utils.random(1, 20, 1), #self.flee_messages)]
+        return self.flee_messages[Utils.random(1, #self.flee_messages, 1)]
     end)
     
     Utils.hook(Encounter, "getVictoryText", function(orig, self, text, money, xp)
-        if Game.battle.state_reason == "FLEE" then
+        if Game.battle.fled then
             if money ~= 0 or xp ~= 0 or Game.battle.used_violence and Game:getConfig("growStronger") and not Game:isLight() then
                 if Game:isLight() then
                     return "* Ran away with " .. xp .. " EXP\nand " .. money .. " " .. Game:getConfig("lightCurrency"):upper() .. "."
@@ -1042,12 +1044,15 @@ function lib:init()
         end
     end)
     
-    Utils.hook(Encounter, "onFlee", function(orig, self)
-        Game.battle:setState("VICTORY", "FLEE")
+    Utils.hook(Battle, "onFlee", function(orig, self)
+        self.fled = true
+        self:setState("VICTORY", "FLEE")
         
         Assets.playSound("defeatrun")
+        
+        self.encounter:onFlee()
 
-        for _,party in ipairs(Game.battle.party) do
+        for _,party in ipairs(self.party) do
             party:setSprite("battle/hurt")
             local sweat = Sprite("effects/defeat/sweat")
             sweat:setOrigin(1.5, 0.5)
@@ -1058,10 +1063,10 @@ function lib:init()
             
             local counter_start = 0
             local counter_end = 0
-            Game.battle.timer:doWhile(function() return counter_end >= 0 end, function()
+            self.timer:doWhile(function() return counter_end >= 0 end, function()
                 counter_end = counter_end + DTMULT
                 
-                if counter_end >= 30 or Game.battle.state == "TRANSITIONOUT" then
+                if counter_end >= 30 or self.state == "TRANSITIONOUT" then
                     if counter_start < 0 then
                         party.x = -200
                     end
@@ -1070,10 +1075,10 @@ function lib:init()
                 end
             end)
 
-            Game.battle.timer:doWhile(function() return counter_start >= 0 end, function()
+            self.timer:doWhile(function() return counter_start >= 0 end, function()
                 counter_start = counter_start + DTMULT
                 
-                if counter_start >= 15 or Game.battle.state == "TRANSITIONOUT" then
+                if counter_start >= 15 or self.state == "TRANSITIONOUT" then
                     sweat:remove()
                     if counter_end >= 0 then
                         party:getActiveSprite().run_away_party = true
@@ -1084,9 +1089,10 @@ function lib:init()
         end
     end)
     
+    Utils.hook(Encounter, "onFlee", function(orig, self) end)
     Utils.hook(Encounter, "onFleeFail", function(orig, self) end)
     
-    Utils.hook(Encounter, "beforeStateChange", function(orig, self, old, new)
+    Utils.hook(Encounter, "beforeStateChange", function(orig, self, old, new, reason)
         if new == "VICTORY" then
             if Game:isLight() then
                 Game.battle.used_violence_backup = Game.battle.used_violence
@@ -1094,33 +1100,34 @@ function lib:init()
                 Game.battle.money_backup = Game.money
             end
         end
-        return orig(self, old, new)
+        return orig(self, old, new, reason)
     end)
     
-    Utils.hook(Encounter, "onStateChange", function(orig, self, old, new)
-        if new == "VICTORY" then
-            for _,battler in ipairs(Game.battle.party) do
-                battler.chara:setHealth(battler.chara:getHealth() - battler.karma)
-                battler.karma = 0
+    Utils.hook(Battle, "onVictory", function(orig, self)
+        local value = orig(self)
+        
+        for _,battler in ipairs(Game.battle.party) do
+            battler.chara:setHealth(battler.chara:getHealth() - battler.karma)
+            battler.karma = 0
+        end
+        
+        if Game:isLight() then
+            Game.lw_money = Game.lw_money + Game.battle.money
+            Game.money = Game.battle.money_backup
+            Game.xp = Game.xp - Game.battle.xp
+            
+            if (Game.lw_money < 0) then
+                Game.lw_money = 0
             end
             
-            if Game:isLight() then
-                Game.lw_money = Game.lw_money + Game.battle.money
-                Game.money = Game.battle.money_backup
-                Game.xp = Game.xp - Game.battle.xp
-                
-                if (Game.lw_money < 0) then
-                    Game.lw_money = 0
-                end
-                
-                Game.battle.used_violence = Game.battle.used_violence_backup
-            end
+            Game.battle.used_violence = Game.battle.used_violence_backup
         end
-        return orig(self, old, new)
+        
+        return value
     end)
     
     Utils.hook(Encounter, "getVictoryMoney", function(orig, self, money)
-        if Game.battle.state_reason == "FLEE" or Game:isLight() then
+        if Game.battle.fled or Game:isLight() then
             local tension_money = math.floor(((Game:getTension() * 2.5) / 10)) * Game.chapter
             for _,battler in ipairs(Game.battle.party) do
                 for _,equipment in ipairs(battler.chara:getEquipment()) do
@@ -1130,7 +1137,7 @@ function lib:init()
             money = math.floor(money - tension_money)
         end
         
-        if Game:isLight() and Kristal.getLibConfig("magical-glass", "light_world_dark_battle_tension") and Game.battle.state_reason ~= "FLEE" then
+        if Game:isLight() and Kristal.getLibConfig("magical-glass", "light_world_dark_battle_tension") and not Game.battle.fled then
             local tension_money = math.floor(Game:getTension() / 5)
             for _,battler in ipairs(Game.battle.party) do
                 for _,equipment in ipairs(battler.chara:getEquipment()) do
@@ -1141,20 +1148,6 @@ function lib:init()
         end
         
         return money
-    end)
-    
-    Utils.hook(Encounter, "getSoulSpawnLocation", function(orig, self)
-        local main_chara = Game:getSoulPartyMember()
-
-        if main_chara and main_chara:getSoulPriority() >= 0 then
-            local battler = Game.battle.party[Game.battle:getPartyIndex(main_chara.id)]
-
-            if battler then
-                local offset_x, offset_y = main_chara:getSoulOffset()
-                return battler:localToScreenPos(battler.sprite.width/2 - 4.5 + offset_x, battler.sprite.height/2 + offset_y)
-            end
-        end
-        return -9, -9
     end)
 
     Utils.hook(Game, "encounter", function(orig, self, encounter, transition, enemy, context, light)
@@ -4359,7 +4352,7 @@ function lib:init()
         
         local reload_buttons = 0
         if not self.battler.already_has_flee_button then
-            if Game.battle.encounter.can_flee then
+            if Game.battle.encounter:canFlee() then
                 if Game.battle:getPartyIndex(battle_leader) == Game.battle.current_selecting and (Input.pressed("up") or Input.pressed("down")) then
                     if self.hovered then
                         local last_type = self.type
@@ -4383,7 +4376,6 @@ function lib:init()
                 end
             else
                 if self.battler.flee_button == true and Game.battle:getPartyIndex(self.battler.chara.id) == Game.battle.current_selecting then
-                    print(true)
                     self.battler.flee_button = false
                     reload_buttons = 2
                 end
@@ -4636,7 +4628,7 @@ end
 
 function lib:onActionSelect(battler, button)
     if button.type == "flee" then
-        if Game.battle.encounter.can_flee then
+        if Game.battle.encounter:canFlee() then
             local chance = Game.battle.encounter.flee_chance
 
             for _,party in ipairs(Game.battle.party) do
@@ -4648,7 +4640,7 @@ function lib:onActionSelect(battler, button)
             chance = math.floor(chance)
 
             if chance >= Utils.random(1, 100, 1) then
-                Game.battle.encounter:onFlee()
+                Game.battle:onFlee()
             else
                 Game.battle.current_selecting = 0
                 Game.battle:setState("ENEMYDIALOGUE", "FLEEFAIL")
@@ -4659,145 +4651,6 @@ function lib:onActionSelect(battler, button)
             Game.battle:setEncounterText({text = "* You attempted to escape,\n[wait:5]but it failed."})
             return true
         end
-    elseif button.type == "save" then
-        if Mod.libs["moreparty"] and not Kristal.getLibConfig("moreparty", "classic_mode") and #Game.battle.party > 3 and battler.chara:hasSpells() then
-            Game.battle:clearMenuItems()
-            Game.battle:addMenuItem({
-                ["name"] = Kristal.getLibConfig("moreparty", "custom_act_name")[1],
-                ["description"] = Kristal.getLibConfig("moreparty", "custom_act_name")[2],
-                ["color"] = {1,1,1,1},
-                ["callback"] = function() Game.battle:setState("ENEMYSELECT", "ACT") end
-            })
-            local magic_color = {1,1,1,1}
-            if battler then
-                local has_tired = false
-                for _,enemy in ipairs(Game.battle:getActiveEnemies()) do
-                    if enemy.tired then
-                        has_tired = true
-                        break
-                    end
-                end
-                if has_tired then
-                    local has_pacify = false
-                    for _,spell in ipairs(battler.chara:getSpells()) do
-                        if spell and spell:hasTag("spare_tired") then
-                            if spell:isUsable(battler.chara) and spell:getTPCost(battler.chara) <= Game:getTension() then
-                                has_pacify = true
-                                break
-                            end
-                        end
-                    end
-                    if has_pacify then
-                        magic_color = {0, 178/255, 1, 1}
-                    end
-                end
-            end
-            Game.battle:addMenuItem({
-                ["name"] = Kristal.getLibConfig("moreparty", "custom_magic_name")[1],
-                ["description"] = Kristal.getLibConfig("moreparty", "custom_magic_name")[2],
-                ["color"] = magic_color,
-                ["callback"] = function() 
-                    Game.battle:clearMenuItems()
-
-                    -- First, register X-Actions as menu items.
-
-                    if Game.battle.encounter.default_xactions and battler.chara:hasXAct() then
-                        local spell = {
-                            ["name"] = Game.battle.enemies[1]:getXAction(battler),
-                            ["target"] = "xact",
-                            ["id"] = 0,
-                            ["default"] = true,
-                            ["party"] = {},
-                            ["tp"] = 0
-                        }
-
-                        Game.battle:addMenuItem({
-                            ["name"] = battler.chara:getXActName() or "X-Action",
-                            ["tp"] = 0,
-                            ["color"] = {battler.chara:getXActColor()},
-                            ["data"] = spell,
-                            ["callback"] = function(menu_item)
-                                Game.battle.selected_xaction = spell
-                                Game.battle:setState("ENEMYSELECT", "XACT")
-                            end
-                        })
-                    end
-
-                    for id, action in ipairs(Game.battle.xactions) do
-                        if action.party == battler.chara.id then
-                            local spell = {
-                                ["name"] = action.name,
-                                ["target"] = "xact",
-                                ["id"] = id,
-                                ["default"] = false,
-                                ["party"] = {},
-                                ["tp"] = action.tp or 0
-                            }
-
-                            Game.battle:addMenuItem({
-                                ["name"] = action.name,
-                                ["tp"] = action.tp or 0,
-                                ["description"] = action.description,
-                                ["color"] = action.color or {1, 1, 1, 1},
-                                ["data"] = spell,
-                                ["callback"] = function(menu_item)
-                                    Game.battle.selected_xaction = spell
-                                    Game.battle:setState("ENEMYSELECT", "XACT")
-                                end
-                            })
-                        end
-                    end
-
-                    -- Now, register SPELLs as menu items.
-                    for _,spell in ipairs(battler.chara:getSpells()) do
-                        local color = spell.color or {1, 1, 1, 1}
-                        if spell:hasTag("spare_tired") then
-                            local has_tired = false
-                            for _,enemy in ipairs(Game.battle:getActiveEnemies()) do
-                                if enemy.tired then
-                                    has_tired = true
-                                    break
-                                end
-                            end
-                            if has_tired then
-                                color = {0, 178/255, 1, 1}
-                            end
-                        end
-                        Game.battle:addMenuItem({
-                            ["name"] = spell:getName(),
-                            ["tp"] = spell:getTPCost(battler.chara),
-                            ["unusable"] = not spell:isUsable(battler.chara),
-                            ["description"] = spell:getBattleDescription(),
-                            ["party"] = spell.party,
-                            ["color"] = color,
-                            ["data"] = spell,
-                            ["callback"] = function(menu_item)
-                                Game.battle.selected_spell = menu_item
-
-                                if not spell.target or spell.target == "none" then
-                                    Game.battle:pushAction("SPELL", nil, menu_item)
-                                elseif spell.target == "ally" then
-                                    Game.battle:setState("PARTYSELECT", "SPELL")
-                                elseif spell.target == "enemy" then
-                                    Game.battle:setState("ENEMYSELECT", "SPELL")
-                                elseif spell.target == "party" then
-                                    Game.battle:pushAction("SPELL", Game.battle.party, menu_item)
-                                elseif spell.target == "enemies" then
-                                    Game.battle:pushAction("SPELL", Game.battle:getActiveEnemies(), menu_item)
-                                end
-                            end
-                        })
-                    end
-
-                    Game.battle:setState("MENUSELECT", "SPELL")
-                end
-            })
-            Game.battle:setState("MENUSELECT", "ACT+")
-        else
-            Game.battle:setState("ENEMYSELECT", "ACT")
-        end
-        Game.battle:setSubState("SAVE")
-        return true
     end
 end
 

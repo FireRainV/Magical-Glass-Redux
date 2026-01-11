@@ -58,147 +58,10 @@ function LightEncounter:init()
     self.reduced_tension = false
 end
 
-function LightEncounter:onSoulTransition()
-    local soul_char = Mod.libs["multiplayer"] and Game.world.player or Game.world:getPartyCharacterInParty(Game:getSoulPartyMember())
-    Game.battle.fake_player = Game.battle:addChild(FakeClone(soul_char, soul_char:getScreenPos()))
-    Game.battle.fake_player.layer = Game.battle.fader.layer + 1
-
-    Game.battle.timer:script(function(wait)
-        -- Black bg (also, just the fake player without the soul)
-        wait(2/30)
-        -- Show heart
-        Assets.stopAndPlaySound("noise")
-        local transition_soul = Sprite("player/heart_menu", Game.world.soul:getScreenPos())
-        transition_soul:setScale(2)
-        transition_soul:setOrigin(0.5)
-        transition_soul:setColor(self:getSoulColor())
-        transition_soul:setLayer(Game.battle.fader.layer + 2)
-        Game.battle:addChild(transition_soul)
-
-        if not self.fast_transition then
-            wait(2/30)
-            -- Hide heart
-            transition_soul.visible = false
-            wait(2/30)
-            -- Show heart
-            transition_soul.visible = true
-            Assets.stopAndPlaySound("noise")
-            wait(2/30)
-            -- Hide heart
-            transition_soul.visible = false
-            wait(2/30)
-            -- Show heart
-            transition_soul.visible = true
-            Assets.stopAndPlaySound("noise")
-            wait(2/30)
-            -- Do transition
-            Game.battle.fake_player:remove()
-            Assets.playSound("battlefall")
-            
-            local target_x, target_y = 49, 455
-            local offset_x, offset_y = 0, 0
-            if self.soul_target then
-                target_x, target_y = self.soul_target[1], self.soul_target[2]
-            elseif self.event then
-                target_x, target_y = Game.battle.arena:getCenter()
-            end
-            if self.soul_offset then
-                offset_x, offset_y = self.soul_offset[1], self.soul_offset[2]
-            end
-            transition_soul:slideTo(target_x + offset_x, target_y + offset_y, self.event and 10/30 or 18/30)
-
-            wait(self.event and 10/30 or 18/30)
-            
-            -- Wait
-            if not self.event then
-                wait(3/30)
-            else
-                wait(1/30)
-            end
-            
-            transition_soul:remove()
-            Game.battle:spawnSoul(target_x + offset_x - 1, target_y + offset_y - 1)
-            Game.battle.soul:setLayer(Game.battle.fader.layer + 2)
-
-            if not self.event then
-                Game.battle.fader:fadeIn(nil, {speed=5/30})
-            else
-                Game.battle.fader.alpha = 0
-            end
-        else
-            wait(1/30)
-            -- Hide heart
-            transition_soul.visible = false
-            wait(1/30)
-            -- Show heart
-            transition_soul.visible = true
-            Assets.stopAndPlaySound("noise")
-            wait(1/30)
-            -- Hide heart
-            transition_soul.visible = false
-            wait(1/30)
-            -- Show heart
-            transition_soul.visible = true
-            Assets.stopAndPlaySound("noise")
-            wait(1/30)
-            -- Do transition
-            Game.battle.fake_player:remove()
-            Assets.playSound("battlefall")
-            
-            local target_x, target_y = 49, 455
-            local offset_x, offset_y = 0, 0
-            if self.soul_target then
-                target_x, target_y = self.soul_target[1], self.soul_target[2]
-            elseif self.event then
-                target_x, target_y = Game.battle.arena:getCenter()
-            end
-            if self.soul_offset then
-                offset_x, offset_y = self.soul_offset[1], self.soul_offset[2]
-            end
-            transition_soul:slideTo(target_x + offset_x, target_y + offset_y, 10/30)
-            
-            wait(10/30)
-            
-            -- Wait
-            if not self.event then
-                wait(3/30)
-            else
-                wait(5/30)
-            end
-            
-            transition_soul:remove()
-            Game.battle:spawnSoul(target_x + offset_x - 1, target_y + offset_y - 1)
-            Game.battle.soul:setLayer(Game.battle.fader.layer + 2)
-            
-            Game.battle.fader.alpha = 0
-        end
-        Game.battle.transitioned = true
-        self:setBattleState()
-    end)
-end
-
-function LightEncounter:onNoTransition()
-    Game.battle.timer:after(1/30, function()
-        Game.battle.fader.alpha = 0
-        Game.battle.transitioned = true
-        self:setBattleState()
-    end)
-end
-
 function LightEncounter:onBattleInit() end
 
 function LightEncounter:eventWaves()
     return self.event_waves
-end
-
-function LightEncounter:setBattleState()
-    if Game.battle.forced_victory then return end
-    if self.event then
-        Game.battle:setState("ENEMYDIALOGUE")
-    else
-        Game.battle:setState("ACTIONSELECT")
-    end
-    self:onBattleStart()
 end
 
 function LightEncounter:onBattleStart() end
@@ -216,100 +79,15 @@ function LightEncounter:onActionsEnd() end
 
 function LightEncounter:onCharacterTurn(battler, undo) end
 
-function LightEncounter:onFlee()
-    Assets.playSound("escaped")
-    
-    local money = self:getVictoryMoney(Game.battle.money) or Game.battle.money
-    local xp = self:getVictoryXP(Game.battle.xp) or Game.battle.xp
-
-    if money ~= 0 or xp ~= 0 or Game.battle.used_violence and Game:getConfig("growStronger") and not Game:isLight() then
-        if Game:isLight() then
-            for _,battler in ipairs(Game.battle.party) do
-                for _,equipment in ipairs(battler.chara:getEquipment()) do
-                    money = math.floor(equipment:applyMoneyBonus(money) or money)
-                end
-            end
-
-            Game.lw_money = Game.lw_money + math.floor(money)
-
-            if (Game.lw_money < 0) then
-                Game.lw_money = 0
-            end
-
-            self.used_flee_message = "* Ran away with " .. xp .. " EXP\nand " .. money .. " " .. Game:getConfig("lightCurrency"):upper() .. "."
-
-            for _,member in ipairs(Game.battle.party) do
-                local lv = member.chara:getLightLV()
-                member.chara:addLightEXP(xp)
-
-                if lv ~= member.chara:getLightLV() then
-                    Assets.stopAndPlaySound("levelup")
-                end
-            end
-        else
-            for _,battler in ipairs(Game.battle.party) do
-                for _,equipment in ipairs(battler.chara:getEquipment()) do
-                    money = math.floor(equipment:applyMoneyBonus(money) or money)
-                end
-            end
-
-            Game.money = Game.money + math.floor(money)
-            Game.xp = Game.xp + xp
-
-            if (Game.money < 0) then
-                Game.money = 0
-            end
-            
-            if Game.battle.used_violence and Game:getConfig("growStronger") then
-                local stronger = "You"
-
-                local party_to_lvl_up = {}
-                for _,battler in ipairs(Game.battle.party) do
-                    table.insert(party_to_lvl_up, battler.chara)
-                    if Game:getConfig("growStrongerChara") and battler.chara.id == Game:getConfig("growStrongerChara") then
-                        stronger = battler.chara:getName()
-                    end
-                    for _,id in pairs(battler.chara:getStrongerAbsent()) do
-                        table.insert(party_to_lvl_up, Game:getPartyMember(id))
-                    end
-                end
-                
-                for _,party in ipairs(Utils.removeDuplicates(party_to_lvl_up)) do
-                    party.level_up_count = party.level_up_count + 1
-                    party:onLevelUp(party.level_up_count)
-                end
-
-                if xp == 0 then
-                    self.used_flee_message = "* Ran away with " .. money .. " " .. Game:getConfig("darkCurrencyShort") .. ".\n* "..stronger.." became stronger."
-                else
-                    self.used_flee_message = "* Ran away with " .. xp .. " EXP\nand " .. money .. " " .. Game:getConfig("darkCurrencyShort") .. ".\n* "..stronger.." became stronger."
-                end
-
-                Assets.playSound("dtrans_lw", 0.7, 2)
-                --scr_levelup()
-            else
-                self.used_flee_message = "* Ran away with " .. xp .. " EXP\nand " .. money .. " " .. Game:getConfig("darkCurrencyShort") .. "."
-            end
-        end
-    else
-        self.used_flee_message = self:getFleeMessage()
-    end
-
-    Game.battle.soul.collidable = false
-    Game.battle.soul.y = Game.battle.soul.y + 4
-    Game.battle.soul.sprite:setAnimation({"player/heart_gtfo", 1/15, true})
-    Game.battle.soul.physics.speed_x = -3
-
-    Game.battle.timer:after(1, function()
-        Game.battle:setState("TRANSITIONOUT")
-        self:onBattleEnd()
-    end)
+function LightEncounter:canFlee()
+    return self.can_flee
 end
 
+function LightEncounter:onFlee() end
 function LightEncounter:onFleeFail() end
 
-function LightEncounter:beforeStateChange(old, new) end
-function LightEncounter:onStateChange(old, new) end
+function LightEncounter:beforeStateChange(old, new, reason) end
+function LightEncounter:onStateChange(old, new, reason) end
 
 function LightEncounter:onActionSelect(battler, button) end
 
@@ -372,6 +150,10 @@ function LightEncounter:addEnemy(enemy, x, y, ...)
     return enemy_obj
 end
 
+function LightEncounter:getInitialEncounterText()
+    return self.text
+end
+
 function LightEncounter:getFleeMessage()
     return self.flee_messages[math.min(Utils.random(1, 20, 1), #self.flee_messages)]
 end
@@ -388,7 +170,7 @@ function LightEncounter:getEncounterText()
     if enemy then
         return enemy:getEncounterText()
     else
-        return self.text
+        return self:getInitialEncounterText()
     end
 end
 

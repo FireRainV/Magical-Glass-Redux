@@ -82,7 +82,6 @@ function actor:init()
 
         -- Battle offsets
         ["battle/idle"] = {0, 0},
-        ["battle/attack_ready"] = {0, 0},
         ["battle/hurt"] = {0, 0},
         ["battle/down"] = {0, 0},
         ["battle/spare"] = {0, 0},
@@ -104,6 +103,15 @@ function actor:init()
         ["battle/intro"] = {0, 0},
         ["battle/victory"] = {0, 0}
     }
+end
+
+function actor:getSoulOffset()
+    if Game.state == "BATTLE" then
+        local x, y = super.getSoulOffset(self)
+        return x + 2, y + 1
+    else
+        return super.getSoulOffset(self)
+    end
 end
 
 function actor:getVoice()
