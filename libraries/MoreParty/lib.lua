@@ -1,5 +1,4 @@
 local Lib = {}
-Lib.warned = {}
 
 function Lib:init()
     
@@ -1752,17 +1751,6 @@ function Lib:init()
     end)
     
     print("Loaded MoreParty Library")
-end
-
-function Lib:postUpdate()
-    local max_members = (Kristal.getLibConfig("moreparty", "classic_mode") and 6 or 8)
-    if #Game.party > max_members and not Lib.warned["too_many_pm"] then
-        Kristal.Console:warn("too many party members than MoreParty can support. (MAX: ".. max_members ..")")
-        if Kristal.getLibConfig("moreparty", "classic_mode") then
-            Kristal.Console:warn("try disabling the library's 'classic_mode' to allow up to 8.")
-        end
-        Lib.warned["too_many_pm"] = true
-    end
 end
 
 return Lib
