@@ -183,12 +183,16 @@ function LightTensionBar:drawText()
     end
     if (tamt >= 100) then
         self.maxed = true
-
-        love.graphics.setColor(0, 0, 0, 1)
-        love.graphics.print("MAX", 29 - 36, self.height - 4)
-        Draw.setColor(MG_PALETTE["tension_maxtext"])
-        love.graphics.print("MAX", 29 - 37, self.height - 5)
+        
+        self:drawMaxText()
     end
+end
+
+function LightTensionBar:drawMaxText()
+    love.graphics.setColor(0, 0, 0, 1)
+    love.graphics.print("MAX", 29 - 36, self.height - 4)
+    Draw.setColor(MG_PALETTE["tension_maxtext"])
+    love.graphics.print("MAX", 29 - 37, self.height - 5)
 end
 
 function LightTensionBar:drawBack()
@@ -207,7 +211,7 @@ end
 function LightTensionBar:getFillDecreaseColor()
     return self:hasReducedTension() and MG_PALETTE["tension_decrease_reduced"] or MG_PALETTE["tension_decrease"]
 end
---todo: make apparent tension current tension
+
 function LightTensionBar:drawFill()
     local tension_fill = self:getFillColor()
     local tension_max = self:getFillMaxColor()
