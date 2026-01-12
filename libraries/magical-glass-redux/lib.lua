@@ -68,7 +68,6 @@ function lib:save(data)
     data.magical_glass["kills"] = lib.kills
     data.magical_glass["serious_mode"] = lib.serious_mode
     data.magical_glass["spare_color"] = lib.spare_color
-    data.magical_glass["spare_color_name"] = lib.spare_color_name
     data.magical_glass["save_level"] = Game.party[1] and Game.party[1]:getLightLV() or 0
     data.magical_glass["in_light_shop"] = lib.in_light_shop
     data.magical_glass["current_battle_system"] = lib.current_battle_system
@@ -94,8 +93,7 @@ function lib:load(data, new_file)
     data.magical_glass = data.magical_glass or {}
     lib.kills = data.magical_glass["kills"] or 0
     lib.serious_mode = data.magical_glass["serious_mode"] or false
-    lib.spare_color = data.magical_glass["spare_color"] or COLORS.yellow
-    lib.spare_color_name = data.magical_glass["spare_color_name"] or "YELLOW"
+    lib.spare_color = data.magical_glass["spare_color"] or {COLORS.yellow, "YELLOW"}
     lib.in_light_shop = data.magical_glass["in_light_shop"] or false
     lib.current_battle_system = data.magical_glass["current_battle_system"] or nil
     lib.random_encounter = data.magical_glass["random_encounter"] or nil
@@ -5048,19 +5046,19 @@ end
 
 function lib:setLightBattleSpareColor(value, color_name)
     if value == "pink" then
-        lib.spare_color, lib.spare_color_name = MG_PALETTE["pink_spare"], "PINK"
+        lib.spare_color = {MG_PALETTE["pink_spare"], "PINK"}
     elseif type(value) == "table" then
-        lib.spare_color, lib.spare_color_name = value, "SPAREABLE"
+        lib.spare_color = {value, "SPAREABLE"}
     else
         for name,color in pairs(COLORS) do
             if value == name then
-                lib.spare_color, lib.spare_color_name = color, name:upper()
+                lib.spare_color = {color, name:upper()}
                 break
             end
         end
     end
     if type(color_name) == "string" then
-        lib.spare_color_name = color_name:upper()
+        lib.spare_color[2] = color_name:upper()
     end
 end
 

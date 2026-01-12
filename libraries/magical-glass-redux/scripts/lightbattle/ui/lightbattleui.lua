@@ -307,7 +307,7 @@ function LightBattleUI:drawState()
 
             for _,enemy in ipairs(Game.battle:getActiveEnemies()) do
                 if enemy:canSpare() and item.special == "spare" then
-                    menu_text:setColor(MagicalGlassLib.spare_color)
+                    menu_text:setColor(MagicalGlassLib.spare_color[1])
                 end
             end
 

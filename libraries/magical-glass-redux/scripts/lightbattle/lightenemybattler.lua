@@ -331,7 +331,7 @@ function LightEnemyBattler:getSpareText(battler, success)
     if success then
         return "* " .. battler.chara:getNameOrYou() .. " spared " .. self.name .. "."
     else
-        local text = "* " .. battler.chara:getNameOrYou() .. " spared " .. self.name .. ".\n* But its name wasn't [color:"..Utils.rgbToHex(MagicalGlassLib.spare_color).."]"..MagicalGlassLib.spare_color_name.."[color:reset]..."
+        local text = "* " .. battler.chara:getNameOrYou() .. " spared " .. self.name .. ".\n* But its name wasn't [color:"..Utils.rgbToHex(MagicalGlassLib.spare_color[1]).."]"..MagicalGlassLib.spare_color[2].."[color:reset]..."
         if self.tired then
             local found_spell = nil
             for _,party in ipairs(Game.battle.party) do
@@ -501,7 +501,7 @@ function LightEnemyBattler:flash(sprite, offset_x, offset_y, layer)
 end
 
 function LightEnemyBattler:mercyFlash(color)
-    color = color or MagicalGlassLib.spare_color or {1, 1, 0}
+    color = color or MagicalGlassLib.spare_color[1] or {1, 1, 0}
 
     local recolor = self:addFX(RecolorFX())
     Game.battle.timer:during(8/30, function()
@@ -520,7 +520,7 @@ function LightEnemyBattler:onSave(battler) end
 function LightEnemyBattler:getNameColors()
     local result = {}
     if self:canSpare() then
-        table.insert(result, MagicalGlassLib.spare_color)
+        table.insert(result, MagicalGlassLib.spare_color[1])
     end
     if self.tired then
         table.insert(result, {0, 0.7, 1})
