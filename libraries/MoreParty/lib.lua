@@ -3,7 +3,7 @@ local Lib = {}
 function Lib:init()
     
     Utils.hook(ActionBoxDisplay, "draw", function(orig, self)
-        if #Game.party <= 3 then orig(self) return end
+        if #Game.battle.party <= 3 then orig(self) return end
         
         local x = self.parent.realWidth
         
@@ -130,7 +130,7 @@ function Lib:init()
     end)
     
     Utils.hook(ActionBox, "drawActionBox", function(orig, self)
-        if #Game.party <= 3 then orig(self) return end
+        if #Game.battle.party <= 3 then orig(self) return end
         
         local x = self.realWidth
         if Game.battle.current_selecting == self.index then
@@ -144,7 +144,7 @@ function Lib:init()
     end)
     
     Utils.hook(ActionBox, "drawSelectionMatrix", function(orig, self)
-        if #Game.party <= 3 then orig(self) return end
+        if #Game.battle.party <= 3 then orig(self) return end
 
         local x = self.realWidth
 
@@ -538,7 +538,7 @@ function Lib:init()
         
         for k,v in ipairs(self.action_boxes) do
             if k > (Kristal.getLibConfig("moreparty", "classic_mode") and 3 or 4) then
-                v.x = x - e + (Kristal.getLibConfig("moreparty", "classic_mode") and ((6 - #Game.party) * (640 - 1)/6) or ((8 - #Game.party) * (640 - 1)/8))
+                v.x = x - e + (Kristal.getLibConfig("moreparty", "classic_mode") and ((6 - #Game.battle.party) * (640 - 1)/6) or ((8 - #Game.battle.party) * (640 - 1)/8))
                 v.y = Game:getConfig("oldUIPositions") and 36 or 37
                 v.realWidth = realW
                 x = x + realW

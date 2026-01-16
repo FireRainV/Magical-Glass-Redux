@@ -3130,6 +3130,9 @@ function lib:init()
         if Kristal.getLibConfig("magical-glass", "health_conversion") then
             if self.last_converted_health ~= self.health then
                 self.lw_health = math.ceil((self.lw_stats.health / self.stats.health) * self.health)
+                if self.lw_health == self.lw_stats.health and self.health < self.stats.health then
+                    self.lw_health = math.max(self.lw_health - 1, 1)
+                end
                 self.last_converted_health = self.lw_health
             end
         end
@@ -3215,6 +3218,9 @@ function lib:init()
         if Kristal.getLibConfig("magical-glass", "health_conversion") then
             if self.last_converted_health ~= self.lw_health then
                 self.health = math.ceil((self.stats.health / self.lw_stats.health) * self.lw_health)
+                if self.health == self.stats.health and self.lw_health < self.lw_stats.health then
+                    self.health = math.max(self.health - 1, 1)
+                end
                 self.last_converted_health = self.health
             end
         end
