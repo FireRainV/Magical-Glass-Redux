@@ -1270,7 +1270,7 @@ function LightBattle:onEnemyDialogueState()
         local soul_x, soul_y, soul_offset_x, soul_offset_y
         local arena_x, arena_y, arena_h, arena_w
         local has_arena = false
-        local has_soul = false
+        local spawn_soul = false
         local fullscreen = false
         for _,wave in ipairs(self.waves) do
             soul_x = wave.soul_start_x or soul_x
@@ -1284,8 +1284,8 @@ function LightBattle:onEnemyDialogueState()
             if wave.has_arena then
                 has_arena = true
             end
-            if wave.has_soul then
-                has_soul = true
+            if wave.spawn_soul then
+                spawn_soul = true
             end
             if wave.fullscreen then
                 fullscreen = true
@@ -1318,7 +1318,7 @@ function LightBattle:onEnemyDialogueState()
 
         local center_x, center_y = self.arena:getCenter()
 
-        self:toggleSoul(has_soul)
+        self:toggleSoul(spawn_soul)
         soul_x = soul_x or (soul_offset_x and center_x + soul_offset_x)
         soul_y = soul_y or (soul_offset_y and center_y + soul_offset_y)
         self.soul:setPosition(soul_x or center_x, soul_y or center_y)
@@ -2087,7 +2087,7 @@ function LightBattle:update()
         self.arena.alpha = Utils.approach(self.arena.alpha, 1, DTMULT * 0.05)
     end
     
-    --self.update_child_list = true
+    self.update_child_list = true
     super.update(self)
 end
 
@@ -2197,7 +2197,7 @@ function LightBattle:updateDefending()
         if wave.darken then
             darken = true
             time = wave.time
-            if wave.darken == "alt" then
+            if type(wave.darken) ~= "boolean" then
                 alt_darken = true
             end
         end
@@ -2955,7 +2955,7 @@ function LightBattle:clearMenuWaves()
     self.menu_waves = {}
 end
 
-function LightBattle:setWaves(waves)
+function LightBattle:setWaves(waves, allow_duplicates)
     self:clearWaves()
     self:clearMenuWaves()
     self.finished_waves = false
@@ -2973,7 +2973,7 @@ function LightBattle:setWaves(waves)
         if type(wave) == "string" then
             wave = MagicalGlassLib:createLightWave(wave)
         end
-        if wave:getAllowDuplicates() or not exists then
+        if allow_duplicates or not exists then
             wave.encounter = self.encounter
             self:addChild(wave)
             table.insert(self.waves, wave)
@@ -2985,7 +2985,7 @@ function LightBattle:setWaves(waves)
     return self.waves
 end
 
-function LightBattle:setMenuWaves(waves)
+function LightBattle:setMenuWaves(waves, allow_duplicates)
     self:clearWaves()
     self:clearMenuWaves()
     self.finished_menu_waves = false
@@ -3003,7 +3003,7 @@ function LightBattle:setMenuWaves(waves)
         if type(wave) == "string" then
             wave = MagicalGlassLib:createLightWave(wave)
         end
-        if wave:getAllowDuplicates() or not exists then
+        if allow_duplicates or not exists then
             wave.encounter = self.encounter
             self:addChild(wave)
             table.insert(self.menu_waves, wave)
@@ -3766,9 +3766,28 @@ function LightBattle:drawDebug()
     Draw.setColor(1, 1, 1, 1)
     self:debugPrintOutline("State: "    .. self.state   , 4, 0)
     self:debugPrintOutline("Substate: " .. self.substate, 4, 0 + 16)
+    
+    self:debugPrintOutline("- KEYS -", 4, 64)
+    self:debugPrintOutline("CTRL+H - heal party", 4, 80)
+    self:debugPrintOutline("CTRL+Y - win battle", 4, 96)
+    self:debugPrintOutline("CTRL+M - pause/resume music", 4, 112)
+    self:debugPrintOutline("CTRL+F - end current wave", 4, 128)
+    self:debugPrintOutline("CTRL+B - kill party", 4, 144)
+    self:debugPrintOutline("CTRL+K - fill tension", 4, 160)
+    self:debugPrintOutline("CTRL+N - toggle noclip", 4, 176)
 end
 
-function LightBattle:canDeepCopy() -- what
+function LightBattle:applyHealBonuses(base_heal, healer)
+    local current_heal = base_heal
+    for _, battler in ipairs(self.party) do
+        for _, item in ipairs(battler.chara:getEquipment()) do
+            current_heal = item:applyHealBonus(current_heal, base_heal, healer)
+        end
+    end
+    return current_heal
+end
+
+function LightBattle:canDeepCopy()
     return false
 end
 
